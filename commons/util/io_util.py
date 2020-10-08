@@ -1,5 +1,5 @@
 from os.path import normpath
-from log import log
+from ..log import log
 
 
 def filter_files(dir, name="*", ext="*"):
