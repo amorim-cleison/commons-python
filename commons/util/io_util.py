@@ -32,7 +32,7 @@ def is_dir(path):
     return exists(path) and isdir(path)
 
 
-def read_json(path_or_dir):
+def read_json(path_or_dir, include_path=False):
     import json
     all_content = list()
     files = list()
@@ -48,6 +48,7 @@ def read_json(path_or_dir):
         log(f" [{idx + 1} / {total}] Reading '{path}'...", 2)
 
         with open(path) as file:
-            content = json.load(file)
-            all_content.append((content, path))
+            raw = json.load(file)
+            content = (raw, path) if include_path else raw
+            all_content.append(content)
     return all_content
