@@ -18,13 +18,13 @@ def create_if_missing(dir):
 
 
 def exists(path):
-    from os.path import isfile
-    return isfile(path)
+    from os.path import exists
+    return exists(path)
 
 
 def is_file(path):
-    from os.path import isdir
-    return exists(path) and not isdir(path)
+    from os.path import isfile
+    return exists(path) and isfile(path)
 
 
 def is_dir(path):
@@ -35,12 +35,13 @@ def is_dir(path):
 def read_json(path_or_dir, include_path=False):
     import json
     all_content = list()
-    files = list()
 
     if is_file(path_or_dir):
         files = path_or_dir
     elif is_dir(path_or_dir):
-        files = filter_files(dir, ext="json")
+        files = filter_files(path_or_dir, ext="json")
+    else:
+        files = []
 
     total = len(files)
 
