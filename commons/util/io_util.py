@@ -17,6 +17,12 @@ def create_if_missing(dir):
     Path(dir).mkdir(parents=True, exist_ok=True)
 
 
+def delete_dir(self, dir):
+    """ Recursively remove a directory """
+    from shutil import rmtree
+    if exists(dir):
+        rmtree(dir, ignore_errors=True)
+
 def exists(path):
     from os.path import exists
     return exists(path)
@@ -37,7 +43,7 @@ def read_json(path_or_dir, include_path=False):
     all_content = list()
 
     if is_file(path_or_dir):
-        files = path_or_dir
+        files = [path_or_dir]
     elif is_dir(path_or_dir):
         files = filter_files(path_or_dir, ext="json")
     else:
@@ -46,10 +52,39 @@ def read_json(path_or_dir, include_path=False):
     total = len(files)
 
     for idx, path in enumerate(files):
-        log(f" [{idx + 1} / {total}] Reading '{path}'...", 2)
+        log(f" [{idx + 1} / {total}] Reading '{path}'...", 3)
 
         with open(path) as file:
             raw = json.load(file)
             content = (raw, path) if include_path else raw
             all_content.append(content)
     return all_content
+
+
+def save_json(data: dict, path: str):
+    import json
+
+    with open(path, 'w') as file:
+        json.dump(data, file)
+
+
+def save_yaml(data: dict, path: str):
+    import yaml
+
+    with open(path, 'w') as file:
+        yaml.dump(data, file, default_flow_style=False, indent=4)
+
+
+def save_items(items, path):
+    """ Save the items into a file. """
+    import os
+    with open(path, 'w') as file:
+        # Write dict:
+        if isinstance(items, list):
+            for key, val in items.items():
+                file.write(f"{key}:{val}{os.linesep}")
+
+        # Write other iterables:
+        else:
+            for item in items:
+                file.write(f"{item}{os.linesep}")
