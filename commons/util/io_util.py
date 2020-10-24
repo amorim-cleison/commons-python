@@ -61,6 +61,13 @@ def read_json(path_or_dir, include_path=False):
     return all_content
 
 
+def read_yaml(path):
+    import yaml
+
+    with open(path, 'r') as file:
+        return yaml.full_load(file)
+
+
 def save_json(data: dict, path: str):
     import json
 
@@ -88,3 +95,10 @@ def save_items(items, path):
         else:
             for item in items:
                 file.write(f"{item}{os.linesep}")
+
+
+def download_file(url, target_file):
+    from urllib.request import urlretrieve
+    log(f"Downloading '{url}' to '{target_file}'...", 2)
+    urlretrieve(url, target_file)
+    return is_file(target_file)

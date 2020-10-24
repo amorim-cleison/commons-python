@@ -42,7 +42,8 @@ def load_args(description, arguments, argv=None):
 
 def save_args(args, path):
     from commons.util import save_yaml
-    save_yaml(vars(args), path)
+    args = args if args is dict else vars(args)
+    save_yaml(args, path)
 
 
 def __create_parser(description, arguments=list()):
@@ -67,16 +68,14 @@ def __create_parser(description, arguments=list()):
 
 
 def __read_config_file(argv, parser):
-    import yaml
-    from commons.util import exists
+    from commons.util import exists, read_yaml
     args = parser.parse_args(argv)
 
     if (args is not None) and ("config" in args) and (args.config
                                                       is not None) and exists(
                                                           args.config):
         # load config file
-        with open(args.config, 'r') as f:
-            configs = yaml.load(f)
+        configs = read_yaml(args.config)
 
         # update parser from config file
         key = vars(args).keys()
