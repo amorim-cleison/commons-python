@@ -2,12 +2,14 @@ class Argument:
 
     __DEFAULTS = {dict: dict(), list: list(), tuple: tuple(), str: None}
 
-    def __init__(self, *flags, type=str, default=None, help=None) -> None:
+    def __init__(self, *flags, type=str, default=None, options=None, required=False, help=None) -> None:
         self.flags = flags
         self.type = type
         self.default = self.__DEFAULTS.get(
             type,
             default) if (default is None) and (type is not None) else default
+        self.options = options
+        self.required = False
         self.help = help
 
 
@@ -62,8 +64,10 @@ def __create_parser(description, arguments=list()):
         _names = [f if f.startswith("-") else f"-{f}" for f in opt.flags]
         _type = type_fn.get(opt.type, opt.type)
         _default = opt.default
+        _options = opt.options
+        _required = opt.required
         _help = opt.help
-        parser.add_argument(*_names, type=_type, default=_default, help=_help)
+        parser.add_argument(*_names, type=_type, default=_default, choices=_options, required=_required, help=_help)
     return parser
 
 

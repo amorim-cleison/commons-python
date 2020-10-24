@@ -17,7 +17,7 @@ def create_if_missing(dir):
     Path(dir).mkdir(parents=True, exist_ok=True)
 
 
-def delete_dir(self, dir):
+def delete_dir(dir):
     """ Recursively remove a directory """
     from shutil import rmtree
     if exists(dir):
