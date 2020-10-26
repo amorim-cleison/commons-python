@@ -9,7 +9,7 @@ def log(msg, verbose=1, **kwargs):
         print(msg, **kwargs)
 
 
-def log_progress(current, total, message=None, overwritable=False):
+def log_progress_bar(current, total, message=None, overwritable=False, **kwargs):
     increments = 50
     percentual = ((current / total) * 100)
     i = int(percentual // (100 / increments))
@@ -23,4 +23,8 @@ def log_progress(current, total, message=None, overwritable=False):
         end = "\n"
     else:
         end = ""
-    log(text, 1, end=end)
+    log(text, end=end, **kwargs)
+
+
+def log_progress(current, total, message, **kwargs):
+    log(f" [{current} / {total}] {message}",  **kwargs)

@@ -33,7 +33,7 @@ def load_args(description, arguments, argv=None):
         import sys
         argv = sys.argv[1:]
 
-    # Load from `config´ file:
+    # Load from `config` file:
     parser = __create_parser(description, arguments)
     configs = __read_config_file(argv, parser)
 
