@@ -1,52 +1,49 @@
-from os import read
-from os.path import normpath
-from ..log import log
-
 NEW_LINE = "\n"
 
 
-def filter_files(dir, name="*", ext="*"):
+def filter_files(dir, name="*", ext="*", recursive=False):
     """Filter the files in the directory, based on the name and extension provided"""
-    import glob
     assert (dir is not None), "`dir_path` is required"
     _ext = ext if ext.startswith(".") else f".{ext}"
-    _path = normpath(f"{dir}/{name}{_ext}")
-    return glob.glob(_path)
+
+    if recursive:
+        fn = __prepare_path(dir).rglob
+    else:
+        fn = __prepare_path(dir).glob
+    return fn(f"{name}{_ext}")
 
 
 def create_if_missing(dir):
     """Create directory if it does not exist"""
-    from pathlib import Path
-    Path(dir).mkdir(parents=True, exist_ok=True)
+    __prepare_path(dir).mkdir(parents=True, exist_ok=True)
 
 
 def delete_dir(dir):
     """ Recursively remove a directory """
     from shutil import rmtree
-    if exists(dir):
-        rmtree(dir, ignore_errors=True)
+    _dir = __prepare_path(dir).as_posix()
+    if exists(_dir):
+        rmtree(_dir, ignore_errors=True)
 
 
 def exists(path):
-    from os.path import exists
-    return exists(path)
+    return __prepare_path(path).exists()
 
 
 def is_file(path):
-    from os.path import isfile
-    return exists(path) and isfile(path)
+    return exists(path) and __prepare_path(path).is_file()
 
 
 def is_dir(path):
-    from os.path import isdir
-    return exists(path) and isdir(path)
+    return exists(path) and __prepare_path(path).is_dir()
 
 
 def read_json(path_or_dir, include_path=False):
     import json
     data = None
+    _path = __prepare_path(path_or_dir)
 
-    def read_single(path, idx=0, total=1):
+    def read_single(path):
         """ Reads a single file """
         with open(path) as file:
             raw = json.load(file)
@@ -54,13 +51,12 @@ def read_json(path_or_dir, include_path=False):
 
     def read_multiple(paths):
         """ Read multiple files from directory """
-        total = len(paths)
-        return [read_single(path, idx, total) for idx, path in enumerate(paths)]
+        return [read_single(path) for path in paths]
 
-    if is_file(path_or_dir):
-        data = read_single(path_or_dir)
-    elif is_dir(path_or_dir):
-        paths = filter_files(path_or_dir, ext="json")
+    if _path.is_file():
+        data = read_single(_path.as_posix())
+    elif _path.is_dir():
+        paths = filter_files(_path.as_posix(), ext="json")
         data = read_multiple(paths)
     else:
         data = None
@@ -69,33 +65,33 @@ def read_json(path_or_dir, include_path=False):
 
 def read_items(path):
     """ Save the items into a file. """
-    with open(path, "r", newline=NEW_LINE) as file:
+    with __prepare_path(path).open("r", newline=NEW_LINE) as file:
         lines = file.readlines()
         return list(map(lambda x: x.replace(NEW_LINE, ""), lines))
 
 
 def read_yaml(path):
     import yaml
-    with open(path, 'r') as file:
+    with __prepare_path(path).open('r') as file:
         return yaml.full_load(file)
 
 
 def save_json(data: dict, path: str):
     import json
-    with open(path, 'w') as file:
+    with __prepare_path(path).open('w') as file:
         json.dump(data, file)
 
 
 def save_yaml(data: dict, path: str):
     import yaml
-    with open(path, 'w') as file:
+    with __prepare_path(path).open('w') as file:
         yaml.dump(data, file, default_flow_style=False, indent=4)
 
 
 def save_items(items, path, append=False):
     """ Save the items into a file. """
     mode = "a" if append else "w"
-    with open(path, mode, newline=NEW_LINE) as file:
+    with __prepare_path(path).open(mode, newline=NEW_LINE) as file:
         file.write(NEW_LINE.join(items))
 
 
@@ -107,13 +103,19 @@ def download_file(url, target_file):
     except Exception as e:
         return False, str(e)
 
+
 def filename(path, with_extension=True):
     from os.path import splitext, basename
-    filename = basename(path)
+    filename = basename(__prepare_path(path))
     if not with_extension:
         filename = splitext(filename)[0]
     return filename
 
+
 def normalize_path(path):
-    from os.path import normpath
-    return normpath(path)
+    return __prepare_path(path).as_posix()
+
+
+def __prepare_path(path):
+    from pathlib import Path
+    return Path(path).expanduser().absolute()
