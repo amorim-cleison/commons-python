@@ -44,7 +44,7 @@ def load_args(description, arguments, argv=None):
 
 def save_args(args, path):
     from commons.util import save_yaml
-    args = args if args is dict else vars(args)
+    args = args if isinstance(args, dict) else vars(args)
     save_yaml(args, path)
 
 
