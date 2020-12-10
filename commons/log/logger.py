@@ -1,5 +1,6 @@
 VERBOSE = 3
 
+
 def log(msg, verbose=1, **kwargs):
     """
     Log message considering informed `verbose` parameter (min 1, max 3).
@@ -7,6 +8,16 @@ def log(msg, verbose=1, **kwargs):
     assert (0 < verbose <= 3), "Invalid verbose option"
     if verbose <= VERBOSE:
         print(msg, **kwargs)
+
+
+def log_err(msg=None, ex=None, **kwargs):
+    import traceback
+    assert (not msg is None) or (
+        not ex is None), "Message or exception must be informed"
+    if msg is None:
+        msg = str(ex)
+    log(msg, verbose=1, **kwargs)
+    traceback.print_exc()
 
 
 def log_progress_bar(current, total, message=None, overwritable=False, **kwargs):
