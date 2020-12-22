@@ -12,6 +12,7 @@ packages = [
 python = "^3.7"
 # example = { git = "https://github.com/amorim-cleison/example.git", branch = "develop", tag = "0.1.2" }
 PyYAML = "^5.3.1"
+numpy = "^1.19.4"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.8.3"

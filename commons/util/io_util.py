@@ -1,7 +1,7 @@
 NEW_LINE = "\n"
 
 
-def filter_files(dir, name="*", ext="*", recursive=False, as_str=True):
+def filter_files(dir, name="*", ext="*", recursive=False, path_as_str=True):
     """Filter the files in the directory, based on the name and extension provided"""
     assert (dir is not None), "`dir_path` is required"
     _ext = ext if ext.startswith(".") else f".{ext}"
@@ -11,7 +11,7 @@ def filter_files(dir, name="*", ext="*", recursive=False, as_str=True):
     else:
         fn = __get_path(dir).glob
     result = list(fn(f"{name}{_ext}"))
-    return __parse_result(result, as_str)
+    return __parse_result(result, path_as_str)
 
 
 def create_if_missing(dir):
@@ -57,7 +57,7 @@ def read_json(path_or_dir, include_path=False):
     if _path.is_file():
         data = read_single(_path)
     elif _path.is_dir():
-        paths = filter_files(_path, ext="json", as_str=False)
+        paths = filter_files(_path, ext="json", path_as_str=False)
         data = read_multiple(paths)
     else:
         data = None
@@ -113,17 +113,17 @@ def filename(path, with_extension=True):
     return filename
 
 
-def normpath(path, as_str=True):
-    return __parse_result(__get_path(path), as_str)
+def normpath(path, path_as_str=True):
+    return __parse_result(__get_path(path), path_as_str)
 
 
 def __get_path(path):
     from pathlib import Path
     return Path(path).expanduser().absolute()
 
-def __parse_result(path, as_str=True):
+def __parse_result(path, path_as_str=True):
     from pathlib import Path
-    if as_str:
+    if path_as_str:
         if isinstance(path, list):
             return [str(x) for x in path]
         else:
