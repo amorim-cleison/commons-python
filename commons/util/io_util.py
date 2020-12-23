@@ -19,11 +19,18 @@ def create_if_missing(dir):
     __get_path(dir).mkdir(parents=True, exist_ok=True)
 
 
+def delete_file(path):
+    if exists(path):
+        assert is_file(path), "Path must be a file"
+        __get_path(path).unlink()
+
+
 def delete_dir(dir):
     """ Recursively remove a directory """
     from shutil import rmtree
     _dir = normpath(dir)
     if exists(_dir):
+        assert is_dir(dir), "Path must be a directory"
         rmtree(_dir, ignore_errors=True)
 
 
@@ -120,6 +127,7 @@ def normpath(path, path_as_str=True):
 def __get_path(path):
     from pathlib import Path
     return Path(path).expanduser().absolute()
+
 
 def __parse_result(path, path_as_str=True):
     from pathlib import Path
