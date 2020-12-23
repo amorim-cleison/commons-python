@@ -33,6 +33,9 @@ class Coordinate:
     def name(self):
         return self._name
 
+    def is_zero(self):
+        return np.count_nonzero(self._coords) == 0
+
     def cross_product(self, other):
         """
         Cross product between this coordinate and the `other` informed.
