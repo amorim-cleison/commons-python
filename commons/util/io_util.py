@@ -130,7 +130,6 @@ def __get_path(path):
 
 
 def __parse_result(path, path_as_str=True):
-    from pathlib import Path
     if path_as_str:
         if isinstance(path, list):
             return [str(x) for x in path]
