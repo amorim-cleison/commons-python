@@ -1,22 +1,20 @@
-
-def download_file(url, target_file):
-    print(f"Downloading '{url}''...")
-    command = 'wget {}'.format(url)
-    args = {'-O': target_file, '-q': '', '--show-progress': ''}
-    execute_command(command, args)
+import os
+from subprocess import PIPE
 
 
-def execute_command(self, command, args):
-    from subprocess import (check_call, STDOUT, CalledProcessError)
-    str_args = "".join([f"{k} {v}" for k, v in args.items()])
+def execute_command(command, args, stdout=PIPE, stderr=PIPE):
+    from subprocess import (check_call, CalledProcessError)
+    str_args = " ".join([f"{k} {v}" for k, v in args.items()])
     command_line = f"{command} {str_args}"
 
-    try:
-        check_call(command_line, shell=True, stderr=STDOUT)
-        success = True
-    except CalledProcessError as e:
-        success = False
-        print(
-            f"Failed to execute command '{command_line}':\n{e.returncode} {e.output}"
-        )
-    return success
+    with open(os.devnull, 'w') as FNULL:
+        try:
+            stdout = (FNULL if stdout is None else stdout)
+            stderr = (FNULL if stderr is None else stderr)
+            code = check_call(command_line,
+                              shell=True,
+                              stdout=stdout,
+                              stderr=stderr)
+            return (code == 0), None
+        except CalledProcessError as e:
+            return False, str(e)

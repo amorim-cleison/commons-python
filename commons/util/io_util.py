@@ -1,55 +1,139 @@
-from os.path import normpath
-from ..log import log
+NEW_LINE = "\n"
 
 
-def filter_files(dir, name="*", ext="*"):
+def filter_files(dir, name="*", ext="*", recursive=False, path_as_str=True):
     """Filter the files in the directory, based on the name and extension provided"""
-    import glob
     assert (dir is not None), "`dir_path` is required"
     _ext = ext if ext.startswith(".") else f".{ext}"
-    _path = normpath(f"{dir}/{name}{_ext}")
-    return glob.glob(_path)
+
+    if recursive:
+        fn = __get_path(dir).rglob
+    else:
+        fn = __get_path(dir).glob
+    result = list(fn(f"{name}{_ext}"))
+    return __parse_result(result, path_as_str)
 
 
 def create_if_missing(dir):
     """Create directory if it does not exist"""
-    from pathlib import Path
-    Path(dir).mkdir(parents=True, exist_ok=True)
+    __get_path(dir).mkdir(parents=True, exist_ok=True)
+
+
+def delete_file(path):
+    if exists(path):
+        assert is_file(path), "Path must be a file"
+        __get_path(path).unlink()
+
+
+def delete_dir(dir):
+    """ Recursively remove a directory """
+    from shutil import rmtree
+    _dir = normpath(dir)
+    if exists(_dir):
+        assert is_dir(dir), "Path must be a directory"
+        rmtree(_dir, ignore_errors=True)
 
 
 def exists(path):
-    from os.path import exists
-    return exists(path)
+    return __get_path(path).exists()
 
 
 def is_file(path):
-    from os.path import isfile
-    return exists(path) and isfile(path)
+    return exists(path) and __get_path(path).is_file()
 
 
 def is_dir(path):
-    from os.path import isdir
-    return exists(path) and isdir(path)
+    return exists(path) and __get_path(path).is_dir()
 
 
 def read_json(path_or_dir, include_path=False):
     import json
-    all_content = list()
+    data = None
+    _path = __get_path(path_or_dir)
 
-    if is_file(path_or_dir):
-        files = path_or_dir
-    elif is_dir(path_or_dir):
-        files = filter_files(path_or_dir, ext="json")
-    else:
-        files = []
-
-    total = len(files)
-
-    for idx, path in enumerate(files):
-        log(f" [{idx + 1} / {total}] Reading '{path}'...", 2)
-
-        with open(path) as file:
+    def read_single(path):
+        """ Reads a single file """
+        with path.open() as file:
             raw = json.load(file)
-            content = (raw, path) if include_path else raw
-            all_content.append(content)
-    return all_content
+            return (raw, path) if include_path else raw
+
+    def read_multiple(paths):
+        """ Read multiple files from directory """
+        return [read_single(path) for path in paths]
+
+    if _path.is_file():
+        data = read_single(_path)
+    elif _path.is_dir():
+        paths = filter_files(_path, ext="json", path_as_str=False)
+        data = read_multiple(paths)
+    else:
+        data = None
+    return data
+
+
+def read_items(path):
+    """ Save the items into a file. """
+    with __get_path(path).open("r", newline=NEW_LINE) as file:
+        lines = file.readlines()
+        return list(map(lambda x: x.replace(NEW_LINE, ""), lines))
+
+
+def read_yaml(path):
+    import yaml
+    with __get_path(path).open('r') as file:
+        return yaml.full_load(file)
+
+
+def save_json(data: dict, path: str):
+    import json
+    with __get_path(path).open('w') as file:
+        json.dump(data, file)
+
+
+def save_yaml(data: dict, path: str):
+    import yaml
+    with __get_path(path).open('w') as file:
+        yaml.dump(data, file, default_flow_style=False, indent=4)
+
+
+def save_items(items, path, append=False):
+    """ Save the items into a file. """
+    mode = "a" if append else "w"
+    with __get_path(path).open(mode, newline=NEW_LINE) as file:
+        file.write(NEW_LINE.join(items))
+
+
+def download_file(url, target_file):
+    from urllib.request import urlretrieve
+    try:
+        urlretrieve(url, target_file)
+        return is_file(target_file), None
+    except Exception as e:
+        return False, str(e)
+
+
+def filename(path, with_extension=True):
+    from os.path import splitext, basename
+    filename = basename(normpath(path))
+    if not with_extension:
+        filename = splitext(filename)[0]
+    return filename
+
+
+def normpath(path, path_as_str=True):
+    return __parse_result(__get_path(path), path_as_str)
+
+
+def __get_path(path):
+    from pathlib import Path
+    return Path(path).expanduser().absolute()
+
+
+def __parse_result(path, path_as_str=True):
+    if path_as_str:
+        if isinstance(path, list):
+            return [str(x) for x in path]
+        else:
+            return str(path)
+    else:
+        return path
