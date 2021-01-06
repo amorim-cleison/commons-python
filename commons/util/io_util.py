@@ -100,7 +100,8 @@ def save_items(items, path, append=False):
     """ Save the items into a file. """
     mode = "a" if append else "w"
     with __get_path(path).open(mode, newline=NEW_LINE) as file:
-        file.write(NEW_LINE.join(items))
+        content = NEW_LINE.join(items + [""])
+        file.write(content)
 
 
 def download_file(url, target_file):
