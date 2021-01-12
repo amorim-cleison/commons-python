@@ -1,23 +1,60 @@
-VERBOSE = 3
+import logging
+import sys
+
+VERBOSE = 1
+
+LEVELS = {
+    # 5: logging.DEBUG,
+    # 4: logging.INFO,
+    # 3: logging.WARNING,
+    # 2: logging.ERROR,
+    # 1: logging.CRITICAL
+    3: logging.DEBUG,
+    2: logging.INFO,
+    1: logging.WARNING,
+    # 2: logging.ERROR,
+    # 1: logging.CRITICAL
+}
+
+def __create_logger():
+    logLevel = LEVELS[VERBOSE]
+    
+    # Formatter:
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    
+    # File handler:
+    fileHandler = logging.FileHandler("output.log")
+    fileHandler.setLevel(logLevel)
+    fileHandler.setFormatter(formatter)
+
+    # Stdout handler:
+    stdoutHandler = logging.StreamHandler(sys.stdout)
+    fileHandler.setLevel(logLevel)
+    fileHandler.setFormatter(formatter)
+
+    # Logger:
+    logger = logging.getLogger(__name__)
+    logger.addHandler(fileHandler)
+    logger.addHandler(stdoutHandler)
+    return logger
+
+LOGGER = __create_logger()
 
 
-def log(msg, verbose=1, **kwargs):
+def log(msg, verbose=2, **kwargs):
     """
     Log message considering informed `verbose` parameter (min 1, max 3).
     """
-    assert (0 < verbose <= 3), "Invalid verbose option"
-    if verbose <= VERBOSE:
-        print(msg, **kwargs)
+    assert (verbose in LEVELS), "Invalid verbose option"
+    LOGGER.log(msg=msg, level=LEVELS[verbose], **kwargs)
 
 
 def log_err(msg=None, ex=None, **kwargs):
-    import traceback
     assert (not msg is None) or (
         not ex is None), "Message or exception must be informed"
     if msg is None:
         msg = str(ex)
-    log(msg, verbose=1, **kwargs)
-    traceback.print_exc()
+    LOGGER.error(msg=msg, exc_info=True, stack_info=True, **kwargs)
 
 
 def log_progress_bar(current, total, message=None, overwritable=False, **kwargs):
