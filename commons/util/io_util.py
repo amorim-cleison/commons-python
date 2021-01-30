@@ -121,6 +121,10 @@ def filename(path, with_extension=True):
     return filename
 
 
+def extension(path):
+    return "".join(normpath(path, False).suffixes)
+
+
 def normpath(path, path_as_str=True):
     return __parse_result(__get_path(path), path_as_str)
 
