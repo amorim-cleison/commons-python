@@ -10,7 +10,7 @@ def filter_files(dir, name="*", ext="*", recursive=False, path_as_str=True):
         fn = __get_path(dir).rglob
     else:
         fn = __get_path(dir).glob
-    result = list(fn(f"{name}{_ext}"))
+    result = set(fn(f"{name}{_ext}"))
     return __parse_result(result, path_as_str)
 
 
@@ -110,7 +110,7 @@ def download_file(url, target_file):
         urlretrieve(url, target_file)
         return is_file(target_file), None
     except Exception as e:
-        return False, str(e)
+        return False, e
 
 
 def filename(path, with_extension=True):
@@ -138,6 +138,8 @@ def __parse_result(path, path_as_str=True):
     if path_as_str:
         if isinstance(path, list):
             return [str(x) for x in path]
+        if isinstance(path, set):
+            return {str(x) for x in path}
         else:
             return str(path)
     else:
