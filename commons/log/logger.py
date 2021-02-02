@@ -24,7 +24,7 @@ def log_progress_bar(current, total, message=None, overwritable=False, **kwargs)
     increments = 50
     percentual = ((current / total) * 100)
     i = int(percentual // (100 / increments))
-    prefix = f"{message} " if message else ""
+    prefix = f"{message[:30]} " if message else ""
     text = "\r{}|{: <{}}| {:.0f}%".format(prefix, '█' * i, increments,
                                           percentual)
 

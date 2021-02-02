@@ -104,11 +104,30 @@ def save_items(items, path, append=False):
         file.write(content)
 
 
-def download_file(url, target_file):
-    from urllib.request import urlretrieve
+def download_file(url, target_file, progress_bar=False):
+    from requests import get
+    from commons.log import log_progress_bar
+
+    def show_progress(current, total):
+        if progress_bar:
+            log_progress_bar(current, total, overwritable=True)
+
     try:
-        urlretrieve(url, target_file)
-        return is_file(target_file), None
+        response = get(url, stream=True)
+        response.raise_for_status()
+
+        with open(target_file, 'wb') as f:
+            total_size = int(response.headers.get('content-length', 0))
+            chunk_size = 1024
+            downloaded_size = 0
+
+            for chunk in response.iter_content(chunk_size=chunk_size): 
+                if chunk:
+                    f.write(chunk)
+                    f.flush()
+                    downloaded_size += chunk_size
+                    show_progress(downloaded_size, total_size)
+        return response.ok, None
     except Exception as e:
         return False, e
 
