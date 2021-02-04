@@ -37,5 +37,10 @@ def log_progress_bar(current, total, message=None, overwritable=False, **kwargs)
     log(text, end=end, **kwargs)
 
 
+def auto_log_progress(iterable, total=None, message=None):
+    from tqdm import tqdm
+    return tqdm(iterable, total=total, desc=message)
+
+
 def log_progress(current, total, message, **kwargs):
     log(f" [{current} / {total}] {message}",  **kwargs)
