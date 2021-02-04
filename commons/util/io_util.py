@@ -10,7 +10,7 @@ def filter_files(dir, name="*", ext="*", recursive=False, path_as_str=True):
         fn = __get_path(dir).rglob
     else:
         fn = __get_path(dir).glob
-    result = set(fn(f"{name}{_ext}"))
+    result = list(fn(f"{name}{_ext}"))
     return __parse_result(result, path_as_str)
 
 
@@ -106,27 +106,25 @@ def save_items(items, path, append=False):
 
 def download_file(url, target_file, progress_bar=False):
     from requests import get
-    from commons.log import log_progress_bar
-
-    def show_progress(current, total):
-        if progress_bar:
-            log_progress_bar(current, total, overwritable=True)
+    from commons.log import auto_log_progress
 
     try:
         response = get(url, stream=True)
         response.raise_for_status()
 
         with open(target_file, 'wb') as f:
-            total_size = int(response.headers.get('content-length', 0))
             chunk_size = 1024
-            downloaded_size = 0
+            iterable = response.iter_content(chunk_size=chunk_size)
 
-            for chunk in response.iter_content(chunk_size=chunk_size): 
+            if progress_bar:
+                file_length = int(response.headers.get('content-length', 0))
+                total = int(file_length/chunk_size)
+                iterable = auto_log_progress(iterable, total=total)
+
+            for chunk in iterable: 
                 if chunk:
                     f.write(chunk)
                     f.flush()
-                    downloaded_size += chunk_size
-                    show_progress(downloaded_size, total_size)
         return response.ok, None
     except Exception as e:
         return False, e
