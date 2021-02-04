@@ -104,13 +104,30 @@ def save_items(items, path, append=False):
         file.write(content)
 
 
-def download_file(url, target_file):
-    from urllib.request import urlretrieve
+def download_file(url, target_file, progress_bar=False):
+    from requests import get
+    from commons.log import auto_log_progress
+
     try:
-        urlretrieve(url, target_file)
-        return is_file(target_file), None
+        response = get(url, stream=True)
+        response.raise_for_status()
+
+        with open(target_file, 'wb') as f:
+            chunk_size = 1024
+            iterable = response.iter_content(chunk_size=chunk_size)
+
+            if progress_bar:
+                file_length = int(response.headers.get('content-length', 0))
+                total = int(file_length/chunk_size)
+                iterable = auto_log_progress(iterable, total=total)
+
+            for chunk in iterable: 
+                if chunk:
+                    f.write(chunk)
+                    f.flush()
+        return response.ok, None
     except Exception as e:
-        return False, str(e)
+        return False, e
 
 
 def filename(path, with_extension=True):
@@ -119,6 +136,10 @@ def filename(path, with_extension=True):
     if not with_extension:
         filename = splitext(filename)[0]
     return filename
+
+
+def extension(path):
+    return "".join(normpath(path, False).suffixes)
 
 
 def normpath(path, path_as_str=True):
@@ -134,6 +155,8 @@ def __parse_result(path, path_as_str=True):
     if path_as_str:
         if isinstance(path, list):
             return [str(x) for x in path]
+        if isinstance(path, set):
+            return {str(x) for x in path}
         else:
             return str(path)
     else:
