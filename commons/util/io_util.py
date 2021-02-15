@@ -106,7 +106,7 @@ def save_items(items, path, append=False):
 
 def is_downloadable(url):
     from requests import get
-    return get(url, stream-True).ok
+    return get(url, stream=True).ok
 
 
 def download_file(url, target_file, progress_bar=False):
