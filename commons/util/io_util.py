@@ -104,6 +104,11 @@ def save_items(items, path, append=False):
         file.write(content)
 
 
+def is_downloadable(url):
+    from requests import get
+    return get(url, stream-True).ok
+
+
 def download_file(url, target_file, progress_bar=False):
     from requests import get
     from commons.log import auto_log_progress
