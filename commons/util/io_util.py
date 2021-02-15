@@ -153,7 +153,7 @@ def normpath(path, path_as_str=True):
 
 def __get_path(path):
     from pathlib import Path
-    return Path(path).expanduser().absolute()
+    return Path(path).expanduser().resolve()
 
 
 def __parse_result(path, path_as_str=True):
