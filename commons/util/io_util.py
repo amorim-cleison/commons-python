@@ -147,6 +147,10 @@ def extension(path):
     return "".join(normpath(path, False).suffixes)
 
 
+def directory(path, path_as_str=True):
+    return __parse_result(__get_path(path).parent, path_as_str)
+
+
 def normpath(path, path_as_str=True):
     return __parse_result(__get_path(path), path_as_str)
 
