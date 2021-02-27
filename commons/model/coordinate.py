@@ -109,8 +109,8 @@ class Coordinate:
         return self.__from_array(res, self)
 
     def __str__(self):
-        score = f"?" if self.score is None else f"{self.score:.3%}"
-        name = f"unnamed" if self.name is None else self.name
+        score = "?" if self.score is None else f"{self.score:.3%}"
+        name = "unnamed" if self.name is None else self.name
         return f"{name}@({self.x}, {self.y}, {self.z}) ~ {score}"
 
     def __repr__(self):

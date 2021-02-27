@@ -104,6 +104,23 @@ def save_items(items, path, append=False):
         file.write(content)
 
 
+def save_csv(rows, path, append=False):
+    """ Save the dict items into a csv file. """
+    import csv
+    mode = "a" if append else "w"
+    write_header = not exists(path)
+
+    with __get_path(path).open(mode) as f:
+        headers = rows[0].keys() if rows else None
+        writer = csv.DictWriter(f,
+                                fieldnames=headers,
+                                dialect=csv.unix_dialect)
+
+        if write_header and headers:
+            writer.writeheader()
+        writer.writerows(rows)
+
+
 def is_downloadable(url):
     from requests import get
     return get(url, stream=True).ok
@@ -123,10 +140,10 @@ def download_file(url, target_file, progress_bar=False):
 
             if progress_bar:
                 file_length = int(response.headers.get('content-length', 0))
-                total = int(file_length/chunk_size)
+                total = int(file_length / chunk_size)
                 iterable = auto_log_progress(iterable, total=total)
 
-            for chunk in iterable: 
+            for chunk in iterable:
                 if chunk:
                     f.write(chunk)
                     f.flush()
