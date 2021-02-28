@@ -2,7 +2,13 @@ class Argument:
 
     __DEFAULTS = {dict: dict(), list: list(), tuple: tuple(), str: None}
 
-    def __init__(self, *flags, type=str, default=None, options=None, required=False, help=None) -> None:
+    def __init__(self,
+                 *flags,
+                 type=str,
+                 default=None,
+                 options=None,
+                 required=False,
+                 help=None) -> None:
         self.flags = flags
         self.type = type
         self.default = self.__DEFAULTS.get(
@@ -11,13 +17,6 @@ class Argument:
         self.options = options
         self.required = False
         self.help = help
-
-
-CONFIG_FILE_ARG = Argument("-c",
-                           "--config",
-                           type=str,
-                           default="./config/config.yaml",
-                           help="Configuration file")
 
 
 def load_args(description, arguments, argv=None):
@@ -50,11 +49,14 @@ def save_args(args, path):
 
 def __create_parser(description, arguments=list()):
     from argparse import ArgumentParser
+    from commons.constant import GLOBAL_ARGS
+
     parser = ArgumentParser(add_help=True, description=description)
     type_fn = {list: str2list, bool: str2bool, dict: str2dict}
 
     # Add standard arg to arguments list:
-    arguments.insert(0, CONFIG_FILE_ARG)
+    for arg in GLOBAL_ARGS:
+        arguments.insert(0, arg)
 
     for opt in arguments:
         assert (
@@ -67,7 +69,12 @@ def __create_parser(description, arguments=list()):
         _options = opt.options
         _required = opt.required
         _help = opt.help
-        parser.add_argument(*_names, type=_type, default=_default, choices=_options, required=_required, help=_help)
+        parser.add_argument(*_names,
+                            type=_type,
+                            default=_default,
+                            choices=_options,
+                            required=_required,
+                            help=_help)
     return parser
 
 

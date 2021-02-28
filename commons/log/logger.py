@@ -1,71 +1,59 @@
 import logging
-import sys
-
-VERBOSE = 3
 
 LEVELS = {
-    # 5: logging.DEBUG,
-    # 4: logging.INFO,
-    # 3: logging.WARNING,
-    # 2: logging.ERROR,
-    # 1: logging.CRITICAL
-    3: logging.DEBUG,
-    2: logging.INFO,
-    1: logging.WARNING,
+    5: logging.DEBUG,
+    4: logging.INFO,
+    3: logging.WARNING,
+    2: logging.ERROR,
+    1: logging.CRITICAL,
+    0: logging.NOTSET
 }
 
-
-def __create_logger():
-    # FIXME: correct log level
-    # logLevel = LEVELS[VERBOSE]
-
-    # # Formatter:
-    # formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-
-    # # FIXME: `allow file path parametrization`
-    # # File handler:
-    # fileHandler = logging.FileHandler("output.log")
-    # fileHandler.setLevel(logLevel)
-    # fileHandler.setFormatter(formatter)
-
-    # # Stdout handler:
-    # stdoutHandler = logging.StreamHandler(sys.stdout)
-    # stdoutHandler.setLevel(logLevel)
-    # stdoutHandler.setFormatter(formatter)
-
-    # # Logger:
-    # logger = logging.getLogger(__name__)
-    # logger.addHandler(fileHandler)
-    # logger.addHandler(stdoutHandler)
-    # return logger
-    logging.basicConfig(filename='output.log', level=logging.INFO,
-                        format="%(asctime)s - %(levelname)s - %(message)s")
+LOG_INITIALIZED = False
 
 
-LOGGER = __create_logger()
+def init_logger(args):
+    def setup_log(log, verbosity, **kwargs):
+        assert (verbosity in LEVELS), "Invalid verbosity option"
+        logging.basicConfig(filename=log,
+                            level=LEVELS[verbosity],
+                            format="%(asctime)s - %(levelname)s - %(message)s")
+
+    args = args if isinstance(args, dict) else vars(args)
+    setup_log(**args)
+    global LOG_INITIALIZED
+    LOG_INITIALIZED = True
 
 
-def log(msg, verbose=2, **kwargs):
+def __verify_logger():
+    assert LOG_INITIALIZED, "Logger was not initialized. Please, make\
+        sure to initialize it calling `logger.init` method."
+
+
+def log(msg, verbose=4, **kwargs):
     """
-    Log message considering informed `verbose` parameter (min 1, max 3).
+    Log message considering informed `verbose` parameter (min 1, max 5).
     """
-    assert (verbose in LEVELS), "Invalid verbose option"
-    # FIXME: consider `verbose` parameter
-    # LOGGER.log(msg=msg, level=LEVELS[VERBOSE], **kwargs)
-    # LOGGER.info(msg, **kwargs)
-    logging.info(msg, **kwargs)
+    __verify_logger()
+    logging.log(msg=msg, level=LEVELS[verbose], **kwargs)
+    print(msg, **kwargs)
 
 
 def log_err(msg=None, ex=None, **kwargs):
-    assert (not msg is None) or (
-        not ex is None), "Message or exception must be informed"
+    assert (msg is not None) or (
+        ex is not None), "Message or exception must be informed"
     if msg is None:
         msg = str(ex)
-    # LOGGER.error(msg=msg, exc_info=True, stack_info=True, **kwargs)
+    __verify_logger()
     logging.error(msg=msg, exc_info=True, stack_info=True, **kwargs)
+    print(msg, **kwargs)
 
 
-def log_progress_bar(current, total, message=None, overwritable=False, **kwargs):
+def log_progress_bar(current,
+                     total,
+                     message=None,
+                     overwritable=False,
+                     **kwargs):
     increments = 50
     percentual = ((current / total) * 100)
     i = int(percentual // (100 / increments))
@@ -88,4 +76,4 @@ def auto_log_progress(iterable, total=None, message=None):
 
 
 def log_progress(current, total, message, **kwargs):
-    log(f" [{current} / {total}] {message}",  **kwargs)
+    log(f" [{current} / {total}] {message}", **kwargs)
