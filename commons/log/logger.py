@@ -14,10 +14,12 @@ LOG_INITIALIZED = False
 
 def init_logger(args):
     def setup_log(log, verbosity, **kwargs):
-        assert (verbosity in LEVELS), "Invalid verbosity option"
-        logging.basicConfig(filename=log,
-                            level=LEVELS[verbosity],
-                            format="%(asctime)s - %(levelname)s - %(message)s")
+        if log is not None:
+            assert (verbosity in LEVELS), "Invalid verbosity option"
+            logging.basicConfig(
+                filename=log,
+                level=LEVELS[verbosity],
+                format="%(asctime)s - %(levelname)s - %(message)s")
 
     args = args if isinstance(args, dict) else vars(args)
     setup_log(**args)
@@ -35,7 +37,8 @@ def log(msg, verbose=4, **kwargs):
     Log message considering informed `verbose` parameter (min 1, max 5).
     """
     __verify_logger()
-    logging.log(msg=msg, level=LEVELS[verbose], **kwargs)
+    # logging.log(msg=msg, level=LEVELS[verbose], **kwargs)
+    logging.info(msg=msg, **kwargs)
     print(msg, **kwargs)
 
 
