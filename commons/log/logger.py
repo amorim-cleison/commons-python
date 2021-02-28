@@ -14,12 +14,16 @@ LOG_INITIALIZED = False
 
 def init_logger(args):
     def setup_log(log, verbosity, **kwargs):
+        assert (verbosity in LEVELS), "Invalid verbosity option"
+
         if log is not None:
-            assert (verbosity in LEVELS), "Invalid verbosity option"
-            logging.basicConfig(
-                filename=log,
-                level=LEVELS[verbosity],
-                format="%(asctime)s - %(levelname)s - %(message)s")
+            from commons.util import create_if_missing, directory
+            create_if_missing(directory(log))
+
+        logging.basicConfig(
+            filename=log,
+            level=LEVELS[verbosity],
+            format="%(asctime)s - %(levelname)s - %(message)s")
 
     args = args if isinstance(args, dict) else vars(args)
     setup_log(**args)
