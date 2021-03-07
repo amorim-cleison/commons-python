@@ -84,22 +84,21 @@ def read_yaml(path):
         return yaml.full_load(file)
 
 
-def save_json(data: dict, path: str):
+def save_json(data: dict, path: str, append=False):
     import json
-    with __get_path(path).open('w') as file:
+    with __open_file(path, append) as file:
         json.dump(data, file)
 
 
-def save_yaml(data: dict, path: str):
+def save_yaml(data: dict, path: str, append=False):
     import yaml
-    with __get_path(path).open('w') as file:
+    with __open_file(path, append) as file:
         yaml.dump(data, file, default_flow_style=False, indent=4)
 
 
 def save_items(items, path, append=False):
     """ Save the items into a file. """
-    mode = "a" if append else "w"
-    with __get_path(path).open(mode, newline=NEW_LINE) as file:
+    with __open_file(path, append, newline=NEW_LINE) as file:
         content = NEW_LINE.join(items + [""])
         file.write(content)
 
@@ -107,10 +106,9 @@ def save_items(items, path, append=False):
 def save_csv(rows, path, append=False):
     """ Save the dict items into a csv file. """
     import csv
-    mode = "a" if append else "w"
     write_header = not exists(path)
 
-    with __get_path(path).open(mode) as f:
+    with __open_file(path) as f:
         headers = rows[0].keys() if rows else None
         writer = csv.DictWriter(f,
                                 fieldnames=headers,
@@ -119,6 +117,11 @@ def save_csv(rows, path, append=False):
         if write_header and headers:
             writer.writeheader()
         writer.writerows(rows)
+
+
+def __open_file(path, append, **kwargs):
+    mode = "a" if append else "w"
+    return __get_path(path).open(mode, **kwargs)
 
 
 def is_downloadable(url):
