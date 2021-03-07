@@ -108,7 +108,7 @@ def save_csv(rows, path, append=False):
     import csv
     write_header = not exists(path)
 
-    with __open_file(path) as f:
+    with __open_file(path, append) as f:
         headers = rows[0].keys() if rows else None
         writer = csv.DictWriter(f,
                                 fieldnames=headers,
@@ -119,7 +119,7 @@ def save_csv(rows, path, append=False):
         writer.writerows(rows)
 
 
-def __open_file(path, append, **kwargs):
+def __open_file(path, append=False, **kwargs):
     mode = "a" if append else "w"
     return __get_path(path).open(mode, **kwargs)
 
