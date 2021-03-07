@@ -20,20 +20,22 @@ def init_logger(args):
             from commons.util import create_if_missing, directory
             create_if_missing(directory(log))
 
-        logging.basicConfig(
-            filename=log,
-            level=LEVELS[verbosity],
-            format="%(asctime)s - %(levelname)s - %(message)s")
+            logging.basicConfig(
+                filename=log,
+                level=LEVELS[verbosity],
+                format="%(asctime)s - %(levelname)s - %(message)s")
+
+            global LOG_INITIALIZED
+            LOG_INITIALIZED = True
 
     args = args if isinstance(args, dict) else vars(args)
     setup_log(**args)
-    global LOG_INITIALIZED
-    LOG_INITIALIZED = True
 
 
 def __verify_logger():
-    assert LOG_INITIALIZED, "Logger was not initialized. Please, make\
-        sure to initialize it calling `logger.init` method."
+    # assert LOG_INITIALIZED, "Logger was not initialized. Please, make\
+    #     sure to initialize it calling `logger.init` method."
+    pass
 
 
 def log(msg, verbose=4, **kwargs):
@@ -42,7 +44,8 @@ def log(msg, verbose=4, **kwargs):
     """
     __verify_logger()
     # logging.log(msg=msg, level=LEVELS[verbose], **kwargs)
-    logging.info(msg=msg, **kwargs)
+    if LOG_INITIALIZED:
+        logging.info(msg=msg, **kwargs)
     print(msg, **kwargs)
 
 
@@ -52,7 +55,9 @@ def log_err(msg=None, ex=None, **kwargs):
     if msg is None:
         msg = str(ex)
     __verify_logger()
-    logging.error(msg=msg, exc_info=True, stack_info=True, **kwargs)
+
+    if LOG_INITIALIZED:
+        logging.error(msg=msg, exc_info=True, stack_info=True, **kwargs)
     print(msg, **kwargs)
 
 
