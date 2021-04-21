@@ -14,7 +14,7 @@ python = "^3.7"
 PyYAML = "^5.3.1"
 numpy = "1.19.3"
 requests = "^2.25.1"
-tdqm = "^0.0.1"
+tqdm = "^0.0.1"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.8.3"
