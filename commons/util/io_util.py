@@ -59,7 +59,7 @@ def read_json(path_or_dir, include_path=False):
 
     def read_multiple(paths):
         """ Read multiple files from directory """
-        return [read_single(path) for path in paths]
+        return (read_single(path) for path in paths)
 
     if _path.is_file():
         data = read_single(_path)
@@ -103,7 +103,7 @@ def save_items(items, path, append=False):
         file.write(content)
 
 
-def save_csv(rows, path, append=False):
+def save_csv(rows, path, append=False, **kwargs):
     """ Save the dict items into a csv file. """
     import csv
     write_header = not exists(path)
@@ -112,11 +112,17 @@ def save_csv(rows, path, append=False):
         headers = rows[0].keys() if rows else None
         writer = csv.DictWriter(f,
                                 fieldnames=headers,
-                                dialect=csv.unix_dialect)
+                                dialect=csv.unix_dialect,
+                                **kwargs)
 
         if write_header and headers:
             writer.writeheader()
         writer.writerows(rows)
+
+
+def save_tsv(rows, path, append=False, **kwargs):
+    """ Save the dict items into a tsv file. """
+    return save_csv(rows, path, append=append, delimiter="\t", **kwargs)
 
 
 def __open_file(path, append=False, **kwargs):

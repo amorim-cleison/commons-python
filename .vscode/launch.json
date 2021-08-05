@@ -9,17 +9,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "console": "integratedTerminal",
-            "linux": {
-                "env": {
-                    "python": ".venv/bin/python"
-                }
-            },
-            "windows": {
-                "env": {
-                    "python": ".venv/Scripts/"
-                }
-            },
+            "console": "integratedTerminal"
         }
     ]
 }
