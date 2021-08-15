@@ -18,7 +18,7 @@ def execute_command(command, args, stdout=PIPE, stderr=PIPE):
             stdout = (FNULL if stdout is None else stdout)
             stderr = (FNULL if stderr is None else stderr)
             code = check_call(command_line,
-                              shell=True,
+                              shell=False,
                               stdout=stdout,
                               stderr=stderr)
             return (code == 0), None, None
