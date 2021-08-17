@@ -7,11 +7,18 @@ class Coordinate:
 
     def __init__(self, x, y, z, score=None, name=None):
         self._coords = np.array([np.nan] * len(self.__AXES))
-        self._coords[self.__X] = x
-        self._coords[self.__Y] = y
-        self._coords[self.__Z] = z
+        self._coords[self.__X] = self.__init_axis(x)
+        self._coords[self.__Y] = self.__init_axis(y)
+        self._coords[self.__Z] = self.__init_axis(z)
         self._score = score
         self._name = name
+
+    def __init_axis(self, value):
+        def is_valid(value):
+            return (value is not None) and isinstance(
+                value, (int, float)) and (not np.isnan(value))
+
+        return value if is_valid(value) else 0.0
 
     @property
     def x(self):
