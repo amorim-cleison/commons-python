@@ -59,7 +59,7 @@ def read_json(path_or_dir, include_path=False):
 
     def read_multiple(paths):
         """ Read multiple files from directory """
-        return [read_single(path) for path in paths]
+        return (read_single(path) for path in paths)
 
     if _path.is_file():
         data = read_single(_path)
@@ -84,32 +84,81 @@ def read_yaml(path):
         return yaml.full_load(file)
 
 
-def save_json(data: dict, path: str):
+def save_json(data: dict, path: str, append=False):
     import json
-    with __get_path(path).open('w') as file:
+    with __open_file(path, append) as file:
         json.dump(data, file)
 
 
-def save_yaml(data: dict, path: str):
+def save_yaml(data: dict, path: str, append=False):
     import yaml
-    with __get_path(path).open('w') as file:
+    with __open_file(path, append) as file:
         yaml.dump(data, file, default_flow_style=False, indent=4)
 
 
 def save_items(items, path, append=False):
     """ Save the items into a file. """
+    with __open_file(path, append, newline=NEW_LINE) as file:
+        content = NEW_LINE.join(items + [""])
+        file.write(content)
+
+
+def save_csv(rows, path, append=False, **kwargs):
+    """ Save the dict items into a csv file. """
+    import csv
+    write_header = not exists(path)
+
+    with __open_file(path, append) as f:
+        headers = rows[0].keys() if rows else None
+        writer = csv.DictWriter(f,
+                                fieldnames=headers,
+                                dialect=csv.unix_dialect,
+                                **kwargs)
+
+        if write_header and headers:
+            writer.writeheader()
+        writer.writerows(rows)
+
+
+def save_tsv(rows, path, append=False, **kwargs):
+    """ Save the dict items into a tsv file. """
+    return save_csv(rows, path, append=append, delimiter="\t", **kwargs)
+
+
+def __open_file(path, append=False, **kwargs):
     mode = "a" if append else "w"
-    with __get_path(path).open(mode, newline=NEW_LINE) as file:
-        file.write(NEW_LINE.join(items))
+    return __get_path(path).open(mode, **kwargs)
 
 
-def download_file(url, target_file):
-    from urllib.request import urlretrieve
+def is_downloadable(url):
+    from requests import get
+    return get(url, stream=True).ok
+
+
+def download_file(url, target_file, progress_bar=False):
+    from requests import get
+    from commons.log import auto_log_progress
+
     try:
-        urlretrieve(url, target_file)
-        return is_file(target_file), None
+        response = get(url, stream=True)
+        response.raise_for_status()
+
+        with open(target_file, 'wb') as f:
+            chunk_size = 1024
+            iterable = response.iter_content(chunk_size=chunk_size)
+
+            if progress_bar:
+                file_length = int(response.headers.get('content-length', 0))
+                total = int(file_length / chunk_size)
+                iterable = auto_log_progress(iterable, total=total)
+
+            for chunk in iterable:
+                if chunk:
+                    f.write(chunk)
+                    f.flush()
+        return response.ok, None
     except Exception as e:
-        return False, str(e)
+        return False, e
 
 
 def filename(path, with_extension=True):
@@ -120,19 +169,29 @@ def filename(path, with_extension=True):
     return filename
 
 
+def extension(path):
+    return "".join(normpath(path, False).suffixes)
+
+
+def directory(path, path_as_str=True):
+    return __parse_result(__get_path(path).parent, path_as_str)
+
+
 def normpath(path, path_as_str=True):
     return __parse_result(__get_path(path), path_as_str)
 
 
 def __get_path(path):
     from pathlib import Path
-    return Path(path).expanduser().absolute()
+    return Path(path).expanduser().resolve()
 
 
 def __parse_result(path, path_as_str=True):
     if path_as_str:
         if isinstance(path, list):
             return [str(x) for x in path]
+        if isinstance(path, set):
+            return {str(x) for x in path}
         else:
             return str(path)
     else:
