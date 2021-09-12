@@ -99,6 +99,7 @@ def save_yaml(data: dict, path: str, append=False):
 def save_items(items, path, append=False):
     """ Save the items into a file. """
     with __open_file(path, append, newline=NEW_LINE) as file:
+        items = items if isinstance(items, list) else list(items)
         content = NEW_LINE.join(items + [""])
         file.write(content)
 
