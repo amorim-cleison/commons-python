@@ -79,9 +79,9 @@ def read_items(path):
 
 
 def read_yaml(path):
-    import yaml
+    from ruamel.yaml import load, Loader
     with __get_path(path).open('r') as file:
-        return yaml.full_load(file)
+        return load(file, Loader)
 
 
 def save_json(data: dict, path: str, append=False):

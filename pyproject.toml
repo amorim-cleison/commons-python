@@ -11,11 +11,11 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.8"
 # example = { git = "https://github.com/amorim-cleison/example.git", branch = "develop", tag = "0.1.2" }
-PyYAML = "^5.3.1"
 # numpy = "1.19.3"
 requests = "^2.25.1"
 tqdm = "^4.60.0"
 numpy = "1.21.0"
+"ruamel.yaml" = "^0.17.16"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.8.3"
