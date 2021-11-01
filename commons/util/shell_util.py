@@ -4,7 +4,7 @@ from subprocess import PIPE
 
 def execute_command(command, args, stdout=PIPE, stderr=PIPE):
     from subprocess import (check_call, CalledProcessError)
-      
+
     if isinstance(args, dict):
         str_args = " ".join([f"{k} {v}" for k, v in args.items()])
     elif isinstance(args, list):
