@@ -91,9 +91,9 @@ def save_json(data: dict, path: str, append=False):
 
 
 def save_yaml(data: dict, path: str, append=False):
-    import yaml
+    from ruamel.yaml import dump
     with __open_file(path, append) as file:
-        yaml.dump(data, file, default_flow_style=False, indent=4)
+        dump(data, file, default_flow_style=False, indent=4)
 
 
 def save_items(items, path, append=False):
