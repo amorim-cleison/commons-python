@@ -82,9 +82,7 @@ def __read_config_file(argv, parser):
     from commons.util import exists, read_yaml
     args = parser.parse_args(argv)
 
-    if (args is not None) and ("config" in args) and (args.config is not None):
-        assert exists(args.config), f"Invalid config file: {args.config}"
-
+    if (args is not None) and ("config" in args) and (args.config is not None) and exists(args.config):
         # load config file
         configs = read_yaml(args.config)
 

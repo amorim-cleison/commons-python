@@ -95,7 +95,6 @@ def save_yaml(data: dict, path: str, append=False):
     with __open_file(path, append) as file:
         dump(data, file, default_flow_style=False, indent=4)
 
-
 def save_items(items, path, append=False):
     """ Save the items into a file. """
     with __open_file(path, append, newline=NEW_LINE) as file:
