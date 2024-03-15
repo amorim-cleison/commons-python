@@ -82,16 +82,14 @@ def __read_config_file(argv, parser):
     from commons.util import exists, read_yaml
     args = parser.parse_args(argv)
 
-    if (args is not None) and ("config" in args) and (args.config
-                                                      is not None) and exists(
-                                                          args.config):
+    if (args is not None) and ("config" in args) and (args.config is not None) and exists(args.config):
         # load config file
         configs = read_yaml(args.config)
 
         # update parser from config file
         key = vars(args).keys()
         for k in configs.keys():
-            assert (k in key), 'Unknown argument: {}'.format(k)
+            assert (k in key), f"Unknown argument: {k}"
         return configs
     return dict()
 

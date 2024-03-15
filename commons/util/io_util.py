@@ -79,9 +79,9 @@ def read_items(path):
 
 
 def read_yaml(path):
-    import yaml
+    from ruamel.yaml import load, Loader
     with __get_path(path).open('r') as file:
-        return yaml.full_load(file)
+        return load(file, Loader)
 
 
 def save_json(data: dict, path: str, append=False):
@@ -91,14 +91,14 @@ def save_json(data: dict, path: str, append=False):
 
 
 def save_yaml(data: dict, path: str, append=False):
-    import yaml
+    from ruamel.yaml import dump
     with __open_file(path, append) as file:
-        yaml.dump(data, file, default_flow_style=False, indent=4)
-
+        dump(data, file, default_flow_style=False, indent=4)
 
 def save_items(items, path, append=False):
     """ Save the items into a file. """
     with __open_file(path, append, newline=NEW_LINE) as file:
+        items = items if isinstance(items, list) else list(items)
         content = NEW_LINE.join(items + [""])
         file.write(content)
 
