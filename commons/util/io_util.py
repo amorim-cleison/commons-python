@@ -102,7 +102,6 @@ def save_yaml(data: dict, path: str, append=False):
         yaml.dump(data, file)
 
 
-
 def save_items(items, path, append=False):
     """ Save the items into a file. """
     with __open_file(path, append, newline=NEW_LINE) as file:
